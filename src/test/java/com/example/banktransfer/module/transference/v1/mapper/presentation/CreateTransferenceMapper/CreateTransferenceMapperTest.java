@@ -1,0 +1,30 @@
+package com.example.banktransfer.module.transference.v1.mapper.presentation.CreateTransferenceMapper;
+
+import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceDTO;
+import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
+import jakarta.inject.Inject;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+
+import java.math.BigDecimal;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class CreateTransferenceMapperTest {
+    @Test
+    @DisplayName("should map from dto to entity with correct value")
+    void toEntity() {
+        CreateTransferenceMapper sut = new CreateTransferenceMapper();
+        CreateTransferenceDTO dto = makeDTO();
+        TransferenceEntity entity = sut.toEntity(dto);
+
+        assertEquals(entity.getPayeeId(), dto.payee());
+        assertEquals(entity.getPayerId(), dto.payer());
+        assertEquals(entity.getValue(), dto.value());
+    }
+
+    CreateTransferenceDTO makeDTO() {
+        return new CreateTransferenceDTO(BigDecimal.valueOf(100), 1L, 2L);
+    }
+}
