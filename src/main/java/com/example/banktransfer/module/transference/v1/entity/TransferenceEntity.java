@@ -24,7 +24,7 @@ public class TransferenceEntity extends Entity {
         this.payeeId = payeeId;
     }
 
-    public boolean makeTransference(UserEntity payer, UserEntity payee) {
+    public boolean validate(UserEntity payer, UserEntity payee) {
         return true;
     }
 

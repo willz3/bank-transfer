@@ -23,6 +23,8 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
             return Either.Left(new MerchantPayerError());
         }
 
+        transference.validate(payer, payee);
+
         return Either.Right(null);
     }
 }
