@@ -29,10 +29,18 @@ class CreateTransferenceUseCaseTest {
 
     @Test
     @DisplayName("should call user gateway with correct values to find a payer.")
-    void callUserGateway() {
+    void callUserGatewayPayerId() {
         TransferenceEntity transferenceEntity = makeEntity();
         sut.execute(transferenceEntity);
         verify(userGateway, times(1)).findUserById(transferenceEntity.getPayerId());
+    }
+
+    @Test
+    @DisplayName("should call user gateway with correct values to find a payee.")
+    void callUserGatewayWithPayeeId() {
+        TransferenceEntity transferenceEntity = makeEntity();
+        sut.execute(transferenceEntity);
+        verify(userGateway, times(1)).findUserById(transferenceEntity.getPayeeId());
     }
 
     TransferenceEntity makeEntity() {
