@@ -32,11 +32,14 @@ class CreateTransferenceUseCaseTest {
     private final String SSN = "46101743080";
     private final String ENI = "15964243000117";
 
+    private final UserEntity PAYER = makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN);
+    private final UserEntity PAYEE = makeUser(PAYEE_ID, UserEntity.UserType.MERCHANT, ENI);
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(userGateway.findUserById(PAYER_ID)).thenReturn(makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN));
-        when(userGateway.findUserById(PAYEE_ID)).thenReturn(makeUser(PAYEE_ID, UserEntity.UserType.MERCHANT, ENI));
+        when(userGateway.findUserById(PAYER_ID)).thenReturn(PAYER);
+        when(userGateway.findUserById(PAYEE_ID)).thenReturn(PAYEE);
     }
 
 
@@ -68,6 +71,17 @@ class CreateTransferenceUseCaseTest {
 
         assertTrue(result.isLeft());
         assertInstanceOf(MerchantPayerError.class, result.getLeft());
+    }
+
+    @Test
+    @DisplayName("should call transference validate with correct users")
+    void shouldCallTransferenceValidateCorrectly() {
+        TransferenceEntity transferenceEntityMock = mock(TransferenceEntity.class);
+        when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
+        when(transferenceEntityMock.getPayeeId()).thenReturn(PAYEE_ID);
+        sut.execute(transferenceEntityMock);
+
+        verify(transferenceEntityMock, times(1)).validate(PAYER, PAYEE);
     }
 
     TransferenceEntity makeEntity() {
