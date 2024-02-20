@@ -48,7 +48,7 @@ public class UserEntity extends Entity {
     }
 
     public UserEntity toDebit(BigDecimal value) {
-        BigDecimal newBalance = this.balance.subtract(value);
+        BigDecimal newBalance = getBalance().subtract(value);
         return new UserEntityBuilder()//
                 .withName(getName())//
                 .withDocument(getDocument())//

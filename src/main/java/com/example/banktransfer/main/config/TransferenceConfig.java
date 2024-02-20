@@ -17,4 +17,6 @@ public class TransferenceConfig {
         return new CreateTransferenceMapper();
     }
 
+    @Bean
+    ITransferenceGateway transferenceGateway() { return new TransferenceGateway(); }
 }

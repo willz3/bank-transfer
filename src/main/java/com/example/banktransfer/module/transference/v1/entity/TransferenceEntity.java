@@ -1,6 +1,7 @@
 package com.example.banktransfer.module.transference.v1.entity;
 
 import com.example.banktransfer.core.domain.Entity;
+import com.example.banktransfer.module.transference.v1.entity.builder.TransferenceEntityBuilder;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -46,7 +47,16 @@ public class TransferenceEntity extends Entity {
     }
 
     public boolean validateDebit(UserEntity payer) {
-        return payer.getBalance().compareTo(value) >= 0;
+        return payer.getBalance().compareTo(getValue()) >= 0;
+    }
+
+    public TransferenceEntity toCredit() {
+        return new TransferenceEntityBuilder()//
+                .withPayerId(getPayeeId())//
+                .withPayeeId(getPayerId())//
+                .withValue(getValue())//
+                .withType(TransferenceType.CREDIT)//
+                .build();
     }
 
     public BigDecimal getValue() {

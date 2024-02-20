@@ -8,5 +8,4 @@ public class UserConfig {
 
     @Bean
     IUserGateway userGateway() {return new UserGateway(); }
-
 }

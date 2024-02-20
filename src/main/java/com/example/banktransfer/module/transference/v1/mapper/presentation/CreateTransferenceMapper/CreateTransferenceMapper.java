@@ -6,6 +6,6 @@ import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity
 public class CreateTransferenceMapper implements ICreateTransferenceMapper {
     @Override
     public TransferenceEntity toEntity(CreateTransferenceDTO dto) {
-        return new TransferenceEntity(dto.value(), dto.payer(), dto.payee());
+        return new TransferenceEntity(dto.value(), dto.payer(), dto.payee(), TransferenceEntity.TransferenceType.DEBIT);
     }
 }
