@@ -29,6 +29,7 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
         }
 
         UserEntity payerToUpdate = payer.toDebit(transference.getValue());
+        UserEntity payeeToUpdate = payee.toCredit(transference.getValue());
 
         return Either.Right(null);
     }

@@ -61,6 +61,20 @@ public class UserEntity extends Entity {
                 .build();
     }
 
+    public UserEntity toCredit(BigDecimal value) {
+        BigDecimal newBalance = this.balance.add(value);
+        return new UserEntityBuilder()//
+                .withName(getName())//
+                .withDocument(getDocument())//
+                .withEmail(getEmail())//
+                .withType(getType())//
+                .withBalance(newBalance)//
+                .withCreatedAt(getCreatedAt())//
+                .withUpdatedAt(getUpdatedAt())//
+                .withDeletedAt(getDeletedAt())//
+                .build();
+    }
+
     public String getName() {
         return name;
     }
