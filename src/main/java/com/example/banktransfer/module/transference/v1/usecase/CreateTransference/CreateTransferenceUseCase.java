@@ -7,6 +7,7 @@ import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import com.example.banktransfer.module.transference.v1.error.MerchantPayerError;
 import com.example.banktransfer.module.transference.v1.error.NotEnoughMoneyError;
 import com.example.banktransfer.module.shared.gateway.user.IUserGateway;
+import com.example.banktransfer.module.transference.v1.error.PayeeNotFoundError;
 import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
 
 
@@ -28,6 +29,10 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
 
         if (payer == null) {
             return Either.Left(new PayerNotFoundError());
+        }
+
+        if (payee == null) {
+            return Either.Left(new PayeeNotFoundError());
         }
 
         if (payer.getType() == UserEntity.UserType.MERCHANT) {
