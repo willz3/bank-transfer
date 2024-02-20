@@ -1,4 +1,4 @@
-package com.example.banktransfer.module.transference.v1.gateway.user;
+package com.example.banktransfer.module.shared.gateway.user;
 
 import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 
