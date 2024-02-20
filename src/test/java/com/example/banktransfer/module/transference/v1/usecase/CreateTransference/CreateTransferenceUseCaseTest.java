@@ -143,6 +143,17 @@ class CreateTransferenceUseCaseTest {
         verify(transferenceGateway, times(1)).create(argThat(obj -> obj.getPayerId().equals(transferenceDebitEntity.getPayerId()) && obj.getPayeeId().equals(transferenceDebitEntity.getPayeeId()) && obj.getValue().equals(transferenceDebitEntity.getValue())));
     }
 
+    @Test
+    @DisplayName("should call update user gateway with correct users.")
+    void shouldCallUserGatewayUpdate() {
+        TransferenceEntity transferenceDebitEntity = makeEntity();
+
+        sut.execute(transferenceDebitEntity);
+
+        verify(userGateway, times(1)).updateUser(argThat(obj -> obj.getId().equals(PAYER_ID) && obj.getBalance().equals(BigDecimal.ZERO) && obj.getType().equals(PAYER.getType()) && obj.getDocument().equals(PAYER.getDocument()) && obj.getEmail().equals(PAYER.getEmail())));
+        verify(userGateway, times(1)).updateUser(argThat(obj -> obj.getId().equals(PAYEE_ID) && obj.getBalance().equals(BigDecimal.valueOf(200)) && obj.getType().equals(PAYEE.getType()) && obj.getDocument().equals(PAYEE.getDocument()) && obj.getEmail().equals(PAYEE.getEmail())));
+    }
+
     TransferenceEntity makeEntity() {
         return new TransferenceEntity(BigDecimal.valueOf(100), PAYER_ID, PAYEE_ID, TransferenceEntity.TransferenceType.DEBIT);
     }
