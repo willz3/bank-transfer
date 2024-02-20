@@ -7,6 +7,7 @@ import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import com.example.banktransfer.module.transference.v1.error.MerchantPayerError;
 import com.example.banktransfer.module.transference.v1.error.NotEnoughMoneyError;
 import com.example.banktransfer.module.shared.gateway.user.IUserGateway;
+import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -154,8 +155,20 @@ class CreateTransferenceUseCaseTest {
         verify(userGateway, times(1)).updateUser(argThat(obj -> obj.getId().equals(PAYEE_ID) && obj.getBalance().equals(BigDecimal.valueOf(200)) && obj.getType().equals(PAYEE.getType()) && obj.getDocument().equals(PAYEE.getDocument()) && obj.getEmail().equals(PAYEE.getEmail())));
     }
 
+    @Test
+    @DisplayName("should return error if payer does not exists.")
+    void payerDoesNotExists() {
+        TransferenceEntity transferenceEntity = makeEntity();
+        when(userGateway.findUserById(transferenceEntity.getPayerId())).thenReturn(null);
+        Either<Error, TransferenceEntity> result = sut.execute(transferenceEntity);
+
+
+        assertTrue(result.isLeft());
+        assertInstanceOf(PayerNotFoundError.class, result.getLeft());
+    }
+
     TransferenceEntity makeEntity() {
-        return new TransferenceEntity(BigDecimal.valueOf(100), PAYER_ID, PAYEE_ID, TransferenceEntity.TransferenceType.DEBIT);
+        return makeEntity(PAYER_ID, PAYEE_ID);
     }
 
     TransferenceEntity makeEntity(Long payerId, Long payeeId) {
