@@ -7,4 +7,9 @@ public class UserGateway implements IUserGateway {
     public UserEntity findUserById(Long id) {
         return null;
     }
+
+    @Override
+    public UserEntity updateUser(UserEntity user) {
+        return null;
+    }
 }

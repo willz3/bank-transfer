@@ -39,6 +39,8 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
 
         transferenceGateway.create(debitTransference);
         transferenceGateway.create(creditTransference);
+        userGateway.updateUser(payerToUpdate);
+        userGateway.updateUser(payeeToUpdate);
 
 
         return Either.Right(null);
