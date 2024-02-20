@@ -1,11 +1,12 @@
 package com.example.banktransfer.module.transference.v1.usecase.CreateTransference;
 
 import com.example.banktransfer.core.shared.logic.Either;
+import com.example.banktransfer.module.shared.gateway.transference.ITransferenceGateway;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import com.example.banktransfer.module.transference.v1.error.MerchantPayerError;
 import com.example.banktransfer.module.transference.v1.error.NotEnoughMoneyError;
-import com.example.banktransfer.module.transference.v1.gateway.user.IUserGateway;
+import com.example.banktransfer.module.shared.gateway.user.IUserGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,9 @@ class CreateTransferenceUseCaseTest {
 
     @Mock
     IUserGateway userGateway;
+
+    @Mock
+    ITransferenceGateway transferenceGateway;
 
     @InjectMocks
     CreateTransferenceUseCase sut;
@@ -81,7 +85,7 @@ class CreateTransferenceUseCaseTest {
         when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
         sut.execute(transferenceEntityMock);
 
-        verify(transferenceEntityMock, times(1)).validate(PAYER);
+        verify(transferenceEntityMock, times(1)).validateDebit(PAYER);
     }
 
     @Test
@@ -89,7 +93,7 @@ class CreateTransferenceUseCaseTest {
     void shouldReturnNotEnoughMoneyError() {
         TransferenceEntity transferenceEntityMock = mock(TransferenceEntity.class);
         when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
-        when(transferenceEntityMock.validate(PAYER)).thenReturn(false);
+        when(transferenceEntityMock.validateDebit(PAYER)).thenReturn(false);
 
         Either<Error, Object> result = sut.execute(transferenceEntityMock);
 
@@ -127,8 +131,24 @@ class CreateTransferenceUseCaseTest {
         verify(userEntityMock, times(1)).toCredit(transferenceEntity.getValue());
     }
 
+    @Test
+    @DisplayName("should call transference gateway to create transfers.")
+    void shouldCallTransferenceGateway() {
+        TransferenceEntity transferenceDebitEntity = makeEntity();
+        TransferenceEntity transferenceCreditEntity = makeEntity(PAYEE_ID, PAYER_ID);
+
+        sut.execute(transferenceDebitEntity);
+
+        verify(transferenceGateway, times(1)).create(argThat(obj -> obj.getPayerId().equals(transferenceCreditEntity.getPayerId()) && obj.getPayeeId().equals(transferenceCreditEntity.getPayeeId()) && obj.getValue().equals(transferenceCreditEntity.getValue())));
+        verify(transferenceGateway, times(1)).create(argThat(obj -> obj.getPayerId().equals(transferenceDebitEntity.getPayerId()) && obj.getPayeeId().equals(transferenceDebitEntity.getPayeeId()) && obj.getValue().equals(transferenceDebitEntity.getValue())));
+    }
+
     TransferenceEntity makeEntity() {
-        return new TransferenceEntity(BigDecimal.valueOf(100), PAYER_ID, PAYEE_ID);
+        return new TransferenceEntity(BigDecimal.valueOf(100), PAYER_ID, PAYEE_ID, TransferenceEntity.TransferenceType.DEBIT);
+    }
+
+    TransferenceEntity makeEntity(Long payerId, Long payeeId) {
+        return new TransferenceEntity(BigDecimal.valueOf(100), payerId, payeeId, TransferenceEntity.TransferenceType.DEBIT);
     }
 
     UserEntity makeUser(Long id, UserEntity.UserType userType, String document) {
