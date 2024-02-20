@@ -53,6 +53,14 @@ class CreateTransferenceUseCaseTest {
     }
 
     @Test
+    @DisplayName("should call user gateway with correct values to find a payee.")
+    void callUserGatewayPayeeId() {
+        TransferenceEntity transferenceEntity = makeEntity();
+        sut.execute(transferenceEntity);
+        verify(userGateway, times(1)).findUserById(PAYEE_ID);
+    }
+
+    @Test
     @DisplayName("should return an error if the payer is a merchant")
     void shouldReturnErrorIfPayerIsMerchant() {
         TransferenceEntity transferenceEntity = makeEntity();
