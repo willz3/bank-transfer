@@ -9,8 +9,11 @@ import com.example.banktransfer.module.transference.v1.error.NotEnoughMoneyError
 import com.example.banktransfer.module.shared.gateway.user.IUserGateway;
 import com.example.banktransfer.module.transference.v1.error.PayeeNotFoundError;
 import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
+@Service
 public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
 
     private final IUserGateway userGateway;
@@ -23,6 +26,7 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
     }
 
     @Override
+    @Transactional
     public Either<Error, TransferenceEntity> execute(TransferenceEntity debitTransference) {
         UserEntity payer = userGateway.findUserById(debitTransference.getPayerId());
         UserEntity payee = userGateway.findUserById(debitTransference.getPayeeId());
