@@ -24,8 +24,8 @@ public class TransferenceEntity extends Entity {
         this.payeeId = payeeId;
     }
 
-    public boolean validate(UserEntity payer, UserEntity payee) {
-        return true;
+    public boolean validate(UserEntity payer) {
+        return payer.getBalance().compareTo(value) >= 0;
     }
 
     public BigDecimal getValue() {
