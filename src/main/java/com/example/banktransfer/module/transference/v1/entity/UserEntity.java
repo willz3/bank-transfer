@@ -1,6 +1,7 @@
 package com.example.banktransfer.module.transference.v1.entity;
 
 import com.example.banktransfer.core.domain.Entity;
+import com.example.banktransfer.module.transference.v1.entity.builder.UserEntityBuilder;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -44,6 +45,20 @@ public class UserEntity extends Entity {
     public enum UserType {
         COMMOM,
         MERCHANT
+    }
+
+    public UserEntity toDebit(BigDecimal value) {
+        BigDecimal newBalance = this.balance.subtract(value);
+        return new UserEntityBuilder()//
+                .withName(getName())//
+                .withDocument(getDocument())//
+                .withEmail(getEmail())//
+                .withType(getType())//
+                .withBalance(newBalance)//
+                .withCreatedAt(getCreatedAt())//
+                .withUpdatedAt(getUpdatedAt())//
+                .withDeletedAt(getDeletedAt())//
+                .build();
     }
 
     public String getName() {

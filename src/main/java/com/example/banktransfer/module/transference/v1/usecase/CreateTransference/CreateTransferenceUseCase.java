@@ -27,6 +27,8 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
             return Either.Left(new NotEnoughMoneyError());
         }
 
+        UserEntity payerToUpdate = payer.toDebit(transference.getValue());
+
         return Either.Right(null);
     }
 }
