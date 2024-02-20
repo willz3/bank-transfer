@@ -99,7 +99,7 @@ class CreateTransferenceUseCaseTest {
 
     @Test
     @DisplayName("should call toDebit of payer with correct value.")
-    void callDebitWithCorrectValue() {
+    void shouldDebitWithCorrectValue() {
         TransferenceEntity transferenceEntity = makeEntity();
         UserEntity userEntityMock = mock(UserEntity.class);
         UserEntity userToReturn = makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN);
@@ -111,6 +111,20 @@ class CreateTransferenceUseCaseTest {
         sut.execute(transferenceEntity);
 
         verify(userEntityMock, times(1)).toDebit(transferenceEntity.getValue());
+    }
+
+    @Test
+    @DisplayName("should call toCredit of payee with correct value.")
+    void shouldCreditWithCorrectValue() {
+        TransferenceEntity transferenceEntity = makeEntity();
+        UserEntity userEntityMock = mock(UserEntity.class);
+
+        when(userGateway.findUserById(transferenceEntity.getPayeeId())).thenReturn(userEntityMock);
+        when(userEntityMock.getBalance()).thenReturn(BigDecimal.valueOf(100));
+
+        sut.execute(transferenceEntity);
+
+        verify(userEntityMock, times(1)).toCredit(transferenceEntity.getValue());
     }
 
     TransferenceEntity makeEntity() {
