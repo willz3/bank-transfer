@@ -7,6 +7,7 @@ import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import com.example.banktransfer.module.transference.v1.error.MerchantPayerError;
 import com.example.banktransfer.module.transference.v1.error.NotEnoughMoneyError;
 import com.example.banktransfer.module.shared.gateway.user.IUserGateway;
+import com.example.banktransfer.module.transference.v1.error.PayeeNotFoundError;
 import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -159,12 +160,24 @@ class CreateTransferenceUseCaseTest {
     @DisplayName("should return error if payer does not exists.")
     void payerDoesNotExists() {
         TransferenceEntity transferenceEntity = makeEntity();
-        when(userGateway.findUserById(transferenceEntity.getPayerId())).thenReturn(null);
+        when(userGateway.findUserById(PAYER_ID)).thenReturn(null);
         Either<Error, TransferenceEntity> result = sut.execute(transferenceEntity);
 
 
         assertTrue(result.isLeft());
         assertInstanceOf(PayerNotFoundError.class, result.getLeft());
+    }
+
+    @Test
+    @DisplayName("should return error if payee does not exists.")
+    void payeeDoesNotExists() {
+        TransferenceEntity transferenceEntity = makeEntity();
+        when(userGateway.findUserById(PAYEE_ID)).thenReturn(null);
+        Either<Error, TransferenceEntity> result = sut.execute(transferenceEntity);
+
+
+        assertTrue(result.isLeft());
+        assertInstanceOf(PayeeNotFoundError.class, result.getLeft());
     }
 
     TransferenceEntity makeEntity() {
