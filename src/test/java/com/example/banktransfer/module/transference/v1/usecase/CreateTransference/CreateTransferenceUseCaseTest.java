@@ -72,7 +72,7 @@ class CreateTransferenceUseCaseTest {
 
         when(userGateway.findUserById(transferenceEntity.getPayerId())).thenReturn(invalidPayer);
 
-        Either<Error, Object> result = sut.execute(transferenceEntity);
+        Either<Error, TransferenceEntity> result = sut.execute(transferenceEntity);
 
         assertTrue(result.isLeft());
         assertInstanceOf(MerchantPayerError.class, result.getLeft());
@@ -95,7 +95,7 @@ class CreateTransferenceUseCaseTest {
         when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
         when(transferenceEntityMock.validateDebit(PAYER)).thenReturn(false);
 
-        Either<Error, Object> result = sut.execute(transferenceEntityMock);
+        Either<Error, TransferenceEntity> result = sut.execute(transferenceEntityMock);
 
         assertTrue(result.isLeft());
         assertInstanceOf(NotEnoughMoneyError.class, result.getLeft());

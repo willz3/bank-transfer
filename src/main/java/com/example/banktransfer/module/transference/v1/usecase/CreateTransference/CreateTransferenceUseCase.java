@@ -21,7 +21,7 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
     }
 
     @Override
-    public Either<Error, Object> execute(TransferenceEntity debitTransference) {
+    public Either<Error, TransferenceEntity> execute(TransferenceEntity debitTransference) {
         UserEntity payer = userGateway.findUserById(debitTransference.getPayerId());
         UserEntity payee = userGateway.findUserById(debitTransference.getPayeeId());
 
@@ -37,12 +37,12 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
         UserEntity payerToUpdate = payer.toDebit(debitTransference.getValue());
         UserEntity payeeToUpdate = payee.toCredit(debitTransference.getValue());
 
-        transferenceGateway.create(debitTransference);
+        TransferenceEntity transferenceToReturn = transferenceGateway.create(debitTransference);
         transferenceGateway.create(creditTransference);
         userGateway.updateUser(payerToUpdate);
         userGateway.updateUser(payeeToUpdate);
 
 
-        return Either.Right(null);
+        return Either.Right(transferenceToReturn);
     }
 }
