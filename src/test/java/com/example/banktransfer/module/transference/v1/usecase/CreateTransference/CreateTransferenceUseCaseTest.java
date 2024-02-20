@@ -4,6 +4,7 @@ import com.example.banktransfer.core.shared.logic.Either;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import com.example.banktransfer.module.transference.v1.error.MerchantPayerError;
+import com.example.banktransfer.module.transference.v1.error.NotEnoughMoneyError;
 import com.example.banktransfer.module.transference.v1.gateway.user.IUserGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,14 +53,6 @@ class CreateTransferenceUseCaseTest {
     }
 
     @Test
-    @DisplayName("should call user gateway with correct values to find a payee.")
-    void callUserGatewayWithPayeeId() {
-        TransferenceEntity transferenceEntity = makeEntity();
-        sut.execute(transferenceEntity);
-        verify(userGateway, times(1)).findUserById(PAYEE_ID);
-    }
-
-    @Test
     @DisplayName("should return an error if the payer is a merchant")
     void shouldReturnErrorIfPayerIsMerchant() {
         TransferenceEntity transferenceEntity = makeEntity();
@@ -74,14 +67,26 @@ class CreateTransferenceUseCaseTest {
     }
 
     @Test
-    @DisplayName("should call transference validate with correct users")
+    @DisplayName("should call transference validate with correct user")
     void shouldCallTransferenceValidateCorrectly() {
         TransferenceEntity transferenceEntityMock = mock(TransferenceEntity.class);
         when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
-        when(transferenceEntityMock.getPayeeId()).thenReturn(PAYEE_ID);
         sut.execute(transferenceEntityMock);
 
-        verify(transferenceEntityMock, times(1)).validate(PAYER, PAYEE);
+        verify(transferenceEntityMock, times(1)).validate(PAYER);
+    }
+
+    @Test
+    @DisplayName("should return NotEnoughMoneyError if payer does not have enough money to make the transference.")
+    void shouldReturnNotEnoughMoneyError() {
+        TransferenceEntity transferenceEntityMock = mock(TransferenceEntity.class);
+        when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
+        when(transferenceEntityMock.validate(PAYER)).thenReturn(false);
+
+        Either<Error, Object> result = sut.execute(transferenceEntityMock);
+
+        assertTrue(result.isLeft());
+        assertInstanceOf(NotEnoughMoneyError.class, result.getLeft());
     }
 
     TransferenceEntity makeEntity() {
