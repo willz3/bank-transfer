@@ -3,28 +3,49 @@ package com.example.banktransfer.module.transference.v1.entity;
 import com.example.banktransfer.core.domain.Entity;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Objects;
 
 public class TransferenceEntity extends Entity {
 
     private BigDecimal value;
+
     private Long payerId;
+
     private Long payeeId;
 
-    public TransferenceEntity(BigDecimal value, Long payerId, Long payeeId) {
-        this.value = value;
-        this.payerId = payerId;
-        this.payeeId = payeeId;
-    }
+    private TransferenceType type;
 
-    public TransferenceEntity(Long id, BigDecimal value, Long payerId, Long payeeId) {
+    private Date createdAt;
+
+    private Date updatedAt;
+
+    private Date deletedAt;
+
+    public TransferenceEntity(Long id, BigDecimal value, Long payerId, Long payeeId, TransferenceType type, Date createdAt, Date updatedAt, Date deletedAt) {
         super(id);
         this.value = value;
         this.payerId = payerId;
         this.payeeId = payeeId;
+        this.type = type;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.deletedAt = deletedAt;
     }
 
-    public boolean validate(UserEntity payer) {
+    public TransferenceEntity(BigDecimal value, Long payerId, Long payeeId, TransferenceType type) {
+        this.value = value;
+        this.payerId = payerId;
+        this.payeeId = payeeId;
+        this.type = type;
+    }
+
+    public enum TransferenceType {
+        DEBIT,
+        CREDIT
+    }
+
+    public boolean validateDebit(UserEntity payer) {
         return payer.getBalance().compareTo(value) >= 0;
     }
 
@@ -52,12 +73,44 @@ public class TransferenceEntity extends Entity {
         this.payeeId = payeeId;
     }
 
+    public TransferenceType getType() {
+        return type;
+    }
+
+    public void setType(TransferenceType type) {
+        this.type = type;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Date getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Date deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TransferenceEntity that = (TransferenceEntity) o;
-        return Objects.equals(value, that.value) && Objects.equals(payerId, that.payerId) && Objects.equals(payeeId, that.payeeId);
+        return Objects.equals(value, that.value) && Objects.equals(payerId, that.payerId) && Objects.equals(payeeId, that.payeeId) && Objects.equals(type, that.type);
     }
 
     @Override

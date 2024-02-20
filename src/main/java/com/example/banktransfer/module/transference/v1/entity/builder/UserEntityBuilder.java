@@ -5,16 +5,32 @@ import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class UserEntityBuilder {
+public class UserEntityBuilder implements IBuilder {
+
+    private Long id;
+
     private String name;
+
     private String document;
+
     private String email;
+
     private String password;
+
     private UserEntity.UserType type;
+
     private BigDecimal balance;
+
     private Date createdAt;
+
     private Date updatedAt;
+
     private Date deletedAt;
+
+    public UserEntityBuilder withId(Long id) {
+        this.id = id;
+        return this;
+    }
 
     public UserEntityBuilder withName(String name) {
         this.name = name;
@@ -61,7 +77,8 @@ public class UserEntityBuilder {
         return this;
     }
 
+    @Override
     public UserEntity build() {
-        return new UserEntity(name, document, email, password, type, balance, createdAt, updatedAt, deletedAt);
+        return new UserEntity(id, name, document, email, password, type, balance, createdAt, updatedAt, deletedAt);
     }
 }
