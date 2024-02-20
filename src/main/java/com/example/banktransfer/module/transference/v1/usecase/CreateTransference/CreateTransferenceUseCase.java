@@ -18,6 +18,7 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
     @Override
     public Either<Error, Object> execute(TransferenceEntity transference) {
         UserEntity payer = userGateway.findUserById(transference.getPayerId());
+        UserEntity payee = userGateway.findUserById(transference.getPayeeId());
 
         if (payer.getType() == UserEntity.UserType.MERCHANT) {
             return Either.Left(new MerchantPayerError());
