@@ -89,6 +89,22 @@ class CreateTransferenceUseCaseTest {
         assertInstanceOf(NotEnoughMoneyError.class, result.getLeft());
     }
 
+    @Test
+    @DisplayName("should call toDebit of payer with correct value.")
+    void callDebitWithCorrectValue() {
+        TransferenceEntity transferenceEntity = makeEntity();
+        UserEntity userEntityMock = mock(UserEntity.class);
+        UserEntity userToReturn = makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN);
+        userToReturn.setBalance(BigDecimal.ZERO);
+
+        when(userGateway.findUserById(transferenceEntity.getPayerId())).thenReturn(userEntityMock);
+        when(userEntityMock.getBalance()).thenReturn(BigDecimal.valueOf(100));
+
+        sut.execute(transferenceEntity);
+
+        verify(userEntityMock, times(1)).toDebit(transferenceEntity.getValue());
+    }
+
     TransferenceEntity makeEntity() {
         return new TransferenceEntity(BigDecimal.valueOf(100), PAYER_ID, PAYEE_ID);
     }
