@@ -2,10 +2,8 @@ package com.example.banktransfer.module.transference.v1.mapper.presentation.Crea
 
 import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceDTO;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 
 import java.math.BigDecimal;
 
@@ -21,7 +19,7 @@ class CreateTransferenceMapperTest {
 
         assertEquals(entity.getPayeeId(), dto.payee());
         assertEquals(entity.getPayerId(), dto.payer());
-        assertEquals(entity.getValue(), dto.value());
+        assertEquals(entity.getAmount(), dto.value());
     }
 
     CreateTransferenceDTO makeDTO() {
