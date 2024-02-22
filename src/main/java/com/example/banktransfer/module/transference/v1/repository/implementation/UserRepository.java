@@ -20,8 +20,8 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public Optional<UserEntity> findByUserId(Long userId) {
-        return jpaRepository.findById(userId).map(userMapper::toEntity);
+    public UserEntity findByUserId(Long userId) {
+        return jpaRepository.findById(userId).map(userMapper::toEntity).orElse(null);
     }
 
     @Override

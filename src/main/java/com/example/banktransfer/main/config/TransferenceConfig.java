@@ -28,5 +28,7 @@ public class TransferenceConfig {
     }
 
     @Bean
-    ITransferenceGateway transferenceGateway(ITransferenceRepository transferenceRepository) { return new TransferenceGateway(transferenceRepository); }
+    ITransferenceGateway transferenceGateway(ITransferenceRepository transferenceRepository) {
+        return new TransferenceGateway(transferenceRepository);
+    }
 }

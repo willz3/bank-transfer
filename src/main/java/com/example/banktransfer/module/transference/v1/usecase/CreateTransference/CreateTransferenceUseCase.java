@@ -48,14 +48,14 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
         }
 
         TransferenceEntity creditTransference = debitTransference.toCredit();
-        UserEntity payerToUpdate = payer.toDebit(debitTransference.getValue());
-        UserEntity payeeToUpdate = payee.toCredit(debitTransference.getValue());
+        UserEntity payerToUpdate = payer.toDebit(debitTransference.getAmount());
+        UserEntity payeeToUpdate = payee.toCredit(debitTransference.getAmount());
 
         TransferenceEntity transferenceToReturn = transferenceGateway.create(debitTransference);
+
         transferenceGateway.create(creditTransference);
         userGateway.updateUser(payerToUpdate);
         userGateway.updateUser(payeeToUpdate);
-
 
         return Either.Right(transferenceToReturn);
     }

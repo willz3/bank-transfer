@@ -14,7 +14,7 @@ public class UserGateway implements IUserGateway {
     }
 
     @Override
-    public Optional<UserEntity> findUserById(Long id) {
+    public UserEntity findUserById(Long id) {
         return this.repository.findByUserId(id);
     }
 

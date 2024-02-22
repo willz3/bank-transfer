@@ -116,7 +116,7 @@ class CreateTransferenceUseCaseTest {
 
         sut.execute(transferenceEntity);
 
-        verify(userEntityMock, times(1)).toDebit(transferenceEntity.getValue());
+        verify(userEntityMock, times(1)).toDebit(transferenceEntity.getAmount());
     }
 
     @Test
@@ -130,7 +130,7 @@ class CreateTransferenceUseCaseTest {
 
         sut.execute(transferenceEntity);
 
-        verify(userEntityMock, times(1)).toCredit(transferenceEntity.getValue());
+        verify(userEntityMock, times(1)).toCredit(transferenceEntity.getAmount());
     }
 
     @Test
@@ -141,8 +141,8 @@ class CreateTransferenceUseCaseTest {
 
         sut.execute(transferenceDebitEntity);
 
-        verify(transferenceGateway, times(1)).create(argThat(obj -> obj.getPayerId().equals(transferenceCreditEntity.getPayerId()) && obj.getPayeeId().equals(transferenceCreditEntity.getPayeeId()) && obj.getValue().equals(transferenceCreditEntity.getValue())));
-        verify(transferenceGateway, times(1)).create(argThat(obj -> obj.getPayerId().equals(transferenceDebitEntity.getPayerId()) && obj.getPayeeId().equals(transferenceDebitEntity.getPayeeId()) && obj.getValue().equals(transferenceDebitEntity.getValue())));
+        verify(transferenceGateway, times(1)).create(argThat(obj -> obj.getPayerId().equals(transferenceCreditEntity.getPayerId()) && obj.getPayeeId().equals(transferenceCreditEntity.getPayeeId()) && obj.getAmount().equals(transferenceCreditEntity.getAmount())));
+        verify(transferenceGateway, times(1)).create(argThat(obj -> obj.getPayerId().equals(transferenceDebitEntity.getPayerId()) && obj.getPayeeId().equals(transferenceDebitEntity.getPayeeId()) && obj.getAmount().equals(transferenceDebitEntity.getAmount())));
     }
 
     @Test
