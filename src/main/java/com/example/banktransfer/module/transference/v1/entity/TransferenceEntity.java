@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class TransferenceEntity extends Entity {
 
-    private BigDecimal value;
+    private BigDecimal amount;
 
     private Long payerId;
 
@@ -23,9 +23,9 @@ public class TransferenceEntity extends Entity {
 
     private Date deletedAt;
 
-    public TransferenceEntity(Long id, BigDecimal value, Long payerId, Long payeeId, TransferenceType type, Date createdAt, Date updatedAt, Date deletedAt) {
+    public TransferenceEntity(Long id, BigDecimal amount, Long payerId, Long payeeId, TransferenceType type, Date createdAt, Date updatedAt, Date deletedAt) {
         super(id);
-        this.value = value;
+        this.amount = amount;
         this.payerId = payerId;
         this.payeeId = payeeId;
         this.type = type;
@@ -34,8 +34,8 @@ public class TransferenceEntity extends Entity {
         this.deletedAt = deletedAt;
     }
 
-    public TransferenceEntity(BigDecimal value, Long payerId, Long payeeId, TransferenceType type) {
-        this.value = value;
+    public TransferenceEntity(BigDecimal amount, Long payerId, Long payeeId, TransferenceType type) {
+        this.amount = amount;
         this.payerId = payerId;
         this.payeeId = payeeId;
         this.type = type;
@@ -47,24 +47,24 @@ public class TransferenceEntity extends Entity {
     }
 
     public boolean validateDebit(UserEntity payer) {
-        return payer.getBalance().compareTo(getValue()) >= 0;
+        return payer.getBalance().compareTo(getAmount()) >= 0;
     }
 
     public TransferenceEntity toCredit() {
         return new TransferenceEntityBuilder()//
                 .withPayerId(getPayeeId())//
                 .withPayeeId(getPayerId())//
-                .withValue(getValue())//
+                .withAmount(getAmount())//
                 .withType(TransferenceType.CREDIT)//
                 .build();
     }
 
-    public BigDecimal getValue() {
-        return value;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setValue(BigDecimal value) {
-        this.value = value;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public Long getPayerId() {
@@ -120,11 +120,11 @@ public class TransferenceEntity extends Entity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TransferenceEntity that = (TransferenceEntity) o;
-        return Objects.equals(value, that.value) && Objects.equals(payerId, that.payerId) && Objects.equals(payeeId, that.payeeId) && Objects.equals(type, that.type);
+        return Objects.equals(amount, that.amount) && Objects.equals(payerId, that.payerId) && Objects.equals(payeeId, that.payeeId) && Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, payerId, payeeId);
+        return Objects.hash(amount, payerId, payeeId);
     }
 }

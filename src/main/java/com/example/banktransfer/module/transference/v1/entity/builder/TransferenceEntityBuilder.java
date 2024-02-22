@@ -9,7 +9,7 @@ public class TransferenceEntityBuilder implements IBuilder {
 
     private Long id;
 
-    private BigDecimal value;
+    private BigDecimal amount;
 
     private Long payerId;
 
@@ -28,8 +28,8 @@ public class TransferenceEntityBuilder implements IBuilder {
         return this;
     }
 
-    public TransferenceEntityBuilder withValue(BigDecimal value) {
-        this.value = value;
+    public TransferenceEntityBuilder withAmount(BigDecimal value) {
+        this.amount = value;
         return this;
     }
 
@@ -65,6 +65,6 @@ public class TransferenceEntityBuilder implements IBuilder {
 
     @Override
     public TransferenceEntity build() {
-        return new TransferenceEntity(id, value, payerId, payeeId, type, createdAt, updatedAt, deletedAt);
+        return new TransferenceEntity(id, amount, payerId, payeeId, type, createdAt, updatedAt, deletedAt);
     }
 }
