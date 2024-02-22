@@ -6,8 +6,6 @@ import com.example.banktransfer.module.transference.v1.repository.implementation
 import com.example.banktransfer.module.transference.v1.repository.protocol.IUserRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class UserRepository implements IUserRepository {
 

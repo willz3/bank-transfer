@@ -26,9 +26,4 @@ public class TransferenceConfig {
     ITransferenceRepository transferenceRepository(ITransferenceMapper jpaTransferenceMapper) {
         return new TransferenceRepository(jpaTransferenceMapper);
     }
-
-    @Bean
-    ITransferenceGateway transferenceGateway(ITransferenceRepository transferenceRepository) {
-        return new TransferenceGateway(transferenceRepository);
-    }
 }

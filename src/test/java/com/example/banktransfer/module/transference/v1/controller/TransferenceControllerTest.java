@@ -14,14 +14,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
-class CreateTransferenceControllerTest {
+class TransferenceControllerTest {
 
 
     @Mock
     private ICreateTransferenceMapper mapper;
 
     @InjectMocks
-    private CreateTransferenceController sut;
+    private TransferenceController sut;
 
     @BeforeEach
     void setUp() {

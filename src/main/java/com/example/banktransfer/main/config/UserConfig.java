@@ -14,10 +14,4 @@ public class UserConfig {
 
     @Bean
     IUserMapper userMapper() { return new UserMapper(); }
-
-    @Bean
-    IUserRepository userRepository(IUserMapper userMapper) { return new UserRepository(userMapper); }
-
-    @Bean
-    IUserGateway userGateway(IUserRepository userRepository) {return new UserGateway(userRepository); }
 }
