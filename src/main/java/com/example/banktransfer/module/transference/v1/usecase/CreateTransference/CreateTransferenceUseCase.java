@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -30,8 +31,16 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
     @Override
     @Transactional
     public Either<Error, TransferenceEntity> execute(TransferenceEntity debitTransference) {
-        Optional<UserEntity> payerOptional = userGateway.findUserById(debitTransference.getPayerId());
-        Optional<UserEntity> payeeOptional = userGateway.findUserById(debitTransference.getPayeeId());
+
+        CompletableFuture<Optional<UserEntity>> payerFuture = CompletableFuture.supplyAsync(()
+                -> userGateway.findUserById(debitTransference.getPayerId()));
+
+        CompletableFuture<Optional<UserEntity>> payeeFuture = CompletableFuture.supplyAsync(()
+                -> userGateway.findUserById(debitTransference.getPayeeId()));
+
+        CompletableFuture.allOf(payerFuture, payeeFuture).join();
+        Optional<UserEntity> payerOptional = payerFuture.join();
+        Optional<UserEntity> payeeOptional = payeeFuture.join();
 
         if (payerOptional.isEmpty()) {
             return Either.Left(new PayerNotFoundError());

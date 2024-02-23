@@ -3,6 +3,7 @@ package com.example.banktransfer.module.transference.v1.repository.implementatio
 import com.example.banktransfer.infrastructure.db.jpa.model.Transference;
 import com.example.banktransfer.infrastructure.db.jpa.model.User;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
+import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import com.example.banktransfer.module.transference.v1.repository.implementation.jpa.TransferenceJpaRepository;
 import com.example.banktransfer.module.transference.v1.repository.implementation.jpa.UserJpaRepository;
 import com.example.banktransfer.module.transference.v1.repository.implementation.jpa.mapper.protocol.ITransferenceMapper;
@@ -10,6 +11,7 @@ import com.example.banktransfer.module.transference.v1.repository.protocol.ITran
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class TransferenceRepository implements ITransferenceRepository {
@@ -27,8 +29,16 @@ public class TransferenceRepository implements ITransferenceRepository {
 
     @Override
     public TransferenceEntity create(TransferenceEntity entity) {
-        Optional<User> payer = jpaUserRepository.findById(entity.getPayerId());
-        Optional<User> payee = jpaUserRepository.findById(entity.getPayeeId());
+        CompletableFuture<Optional<User>> payerFuture = CompletableFuture.supplyAsync(()
+                -> jpaUserRepository.findById(entity.getPayerId()));
+
+        CompletableFuture<Optional<User>> payeeFuture = CompletableFuture.supplyAsync(()
+                -> jpaUserRepository.findById(entity.getPayeeId()));
+
+        CompletableFuture.allOf(payerFuture, payeeFuture).join();
+        Optional<User> payer = payerFuture.join();
+        Optional<User> payee = payeeFuture.join();
+
         Transference transference = mapper.toPersistence(entity);
         transference.setPayer(payer.get());
         transference.setPayee(payee.get());
