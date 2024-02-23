@@ -5,6 +5,6 @@ import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import java.util.Optional;
 
 public interface IUserGateway {
-    UserEntity findUserById(Long id);
+    Optional<UserEntity> findUserById(Long id);
     UserEntity updateUser(UserEntity user);
 }

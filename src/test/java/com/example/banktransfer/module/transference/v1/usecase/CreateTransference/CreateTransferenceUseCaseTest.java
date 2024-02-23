@@ -1,6 +1,7 @@
 package com.example.banktransfer.module.transference.v1.usecase.CreateTransference;
 
 import com.example.banktransfer.core.shared.logic.Either;
+import com.example.banktransfer.infrastructure.db.jpa.model.User;
 import com.example.banktransfer.module.shared.gateway.transference.ITransferenceGateway;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import com.example.banktransfer.module.transference.v1.entity.UserEntity;
@@ -16,7 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,8 +42,8 @@ class CreateTransferenceUseCaseTest {
     private final String SSN = "46101743080";
     private final String ENI = "15964243000117";
 
-    private final UserEntity PAYER = makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN);
-    private final UserEntity PAYEE = makeUser(PAYEE_ID, UserEntity.UserType.MERCHANT, ENI);
+    private final Optional<UserEntity> PAYER = makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN);
+    private final Optional<UserEntity> PAYEE = makeUser(PAYEE_ID, UserEntity.UserType.MERCHANT, ENI);
 
     @BeforeEach
     void setUp() {
@@ -70,7 +73,7 @@ class CreateTransferenceUseCaseTest {
     @DisplayName("should return an error if the payer is a merchant")
     void shouldReturnErrorIfPayerIsMerchant() {
         TransferenceEntity transferenceEntity = makeEntity();
-        UserEntity invalidPayer = makeUser(PAYER_ID, UserEntity.UserType.MERCHANT, ENI);
+        Optional<UserEntity> invalidPayer = makeUser(PAYER_ID, UserEntity.UserType.MERCHANT, ENI);
 
         when(userGateway.findUserById(transferenceEntity.getPayerId())).thenReturn(invalidPayer);
 
@@ -85,17 +88,20 @@ class CreateTransferenceUseCaseTest {
     void shouldCallTransferenceValidateCorrectly() {
         TransferenceEntity transferenceEntityMock = mock(TransferenceEntity.class);
         when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
+        when(transferenceEntityMock.getPayeeId()).thenReturn(PAYEE_ID);
         sut.execute(transferenceEntityMock);
 
-        verify(transferenceEntityMock, times(1)).validateDebit(PAYER);
+        verify(transferenceEntityMock, times(1)).validateDebit(PAYER.get());
     }
 
     @Test
     @DisplayName("should return NotEnoughMoneyError if payer does not have enough money to make the transference.")
     void shouldReturnNotEnoughMoneyError() {
         TransferenceEntity transferenceEntityMock = mock(TransferenceEntity.class);
+        when(userGateway.findUserById(PAYEE_ID)).thenReturn(PAYEE);
         when(transferenceEntityMock.getPayerId()).thenReturn(PAYER_ID);
-        when(transferenceEntityMock.validateDebit(PAYER)).thenReturn(false);
+        when(transferenceEntityMock.getPayeeId()).thenReturn(PAYEE_ID);
+        when(transferenceEntityMock.validateDebit(PAYER.get())).thenReturn(false);
 
         Either<Error, TransferenceEntity> result = sut.execute(transferenceEntityMock);
 
@@ -108,10 +114,10 @@ class CreateTransferenceUseCaseTest {
     void shouldDebitWithCorrectValue() {
         TransferenceEntity transferenceEntity = makeEntity();
         UserEntity userEntityMock = mock(UserEntity.class);
-        UserEntity userToReturn = makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN);
-        userToReturn.setBalance(BigDecimal.ZERO);
+        Optional<UserEntity> userToReturn = makeUser(PAYER_ID, UserEntity.UserType.COMMOM, SSN);
+        userToReturn.get().setBalance(BigDecimal.ZERO);
 
-        when(userGateway.findUserById(transferenceEntity.getPayerId())).thenReturn(userEntityMock);
+        when(userGateway.findUserById(transferenceEntity.getPayerId())).thenReturn(Optional.of(userEntityMock));
         when(userEntityMock.getBalance()).thenReturn(BigDecimal.valueOf(100));
 
         sut.execute(transferenceEntity);
@@ -125,7 +131,7 @@ class CreateTransferenceUseCaseTest {
         TransferenceEntity transferenceEntity = makeEntity();
         UserEntity userEntityMock = mock(UserEntity.class);
 
-        when(userGateway.findUserById(transferenceEntity.getPayeeId())).thenReturn(userEntityMock);
+        when(userGateway.findUserById(transferenceEntity.getPayeeId())).thenReturn(Optional.of(userEntityMock));
         when(userEntityMock.getBalance()).thenReturn(BigDecimal.valueOf(100));
 
         sut.execute(transferenceEntity);
@@ -152,15 +158,15 @@ class CreateTransferenceUseCaseTest {
 
         sut.execute(transferenceDebitEntity);
 
-        verify(userGateway, times(1)).updateUser(argThat(obj -> obj.getId().equals(PAYER_ID) && obj.getBalance().equals(BigDecimal.ZERO) && obj.getType().equals(PAYER.getType()) && obj.getDocument().equals(PAYER.getDocument()) && obj.getEmail().equals(PAYER.getEmail())));
-        verify(userGateway, times(1)).updateUser(argThat(obj -> obj.getId().equals(PAYEE_ID) && obj.getBalance().equals(BigDecimal.valueOf(200)) && obj.getType().equals(PAYEE.getType()) && obj.getDocument().equals(PAYEE.getDocument()) && obj.getEmail().equals(PAYEE.getEmail())));
+        verify(userGateway, times(1)).updateUser(argThat(obj -> obj.getId().equals(PAYER_ID) && obj.getBalance().equals(BigDecimal.ZERO) && obj.getType().equals(PAYER.get().getType()) && obj.getDocument().equals(PAYER.get().getDocument()) && obj.getEmail().equals(PAYER.get().getEmail())));
+        verify(userGateway, times(1)).updateUser(argThat(obj -> obj.getId().equals(PAYEE_ID) && obj.getBalance().equals(BigDecimal.valueOf(200)) && obj.getType().equals(PAYEE.get().getType()) && obj.getDocument().equals(PAYEE.get().getDocument()) && obj.getEmail().equals(PAYEE.get().getEmail())));
     }
 
     @Test
     @DisplayName("should return error if payer does not exists.")
     void payerDoesNotExists() {
         TransferenceEntity transferenceEntity = makeEntity();
-        when(userGateway.findUserById(PAYER_ID)).thenReturn(null);
+        when(userGateway.findUserById(PAYER_ID)).thenReturn(Optional.empty());
         Either<Error, TransferenceEntity> result = sut.execute(transferenceEntity);
 
 
@@ -172,7 +178,7 @@ class CreateTransferenceUseCaseTest {
     @DisplayName("should return error if payee does not exists.")
     void payeeDoesNotExists() {
         TransferenceEntity transferenceEntity = makeEntity();
-        when(userGateway.findUserById(PAYEE_ID)).thenReturn(null);
+        when(userGateway.findUserById(PAYEE_ID)).thenReturn(Optional.empty());
         Either<Error, TransferenceEntity> result = sut.execute(transferenceEntity);
 
 
@@ -188,8 +194,8 @@ class CreateTransferenceUseCaseTest {
         return new TransferenceEntity(BigDecimal.valueOf(100), payerId, payeeId, TransferenceEntity.TransferenceType.DEBIT);
     }
 
-    UserEntity makeUser(Long id, UserEntity.UserType userType, String document) {
-        return new UserEntity(id, "any_name", document, "any_email@mail.com", "any_password", userType, BigDecimal.valueOf(100), null, null, null);
+    Optional<UserEntity> makeUser(Long id, UserEntity.UserType userType, String document) {
+        return Optional.of(new UserEntity(id, "any_name", document, "any_email@mail.com", "any_password", userType, BigDecimal.valueOf(100), null, null, null));
     }
 
 }

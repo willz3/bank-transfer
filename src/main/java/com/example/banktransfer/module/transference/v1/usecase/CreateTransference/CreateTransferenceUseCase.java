@@ -12,6 +12,8 @@ import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 
 @Service
 public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
@@ -28,28 +30,28 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
     @Override
     @Transactional
     public Either<Error, TransferenceEntity> execute(TransferenceEntity debitTransference) {
-        UserEntity payer = userGateway.findUserById(debitTransference.getPayerId());
-        UserEntity payee = userGateway.findUserById(debitTransference.getPayeeId());
+        Optional<UserEntity> payerOptional = userGateway.findUserById(debitTransference.getPayerId());
+        Optional<UserEntity> payeeOptional = userGateway.findUserById(debitTransference.getPayeeId());
 
-        if (payer == null) {
+        if (payerOptional.isEmpty()) {
             return Either.Left(new PayerNotFoundError());
         }
 
-        if (payee == null) {
+        if (payeeOptional.isEmpty()) {
             return Either.Left(new PayeeNotFoundError());
         }
 
-        if (payer.getType() == UserEntity.UserType.MERCHANT) {
+        if (payerOptional.get().getType() == UserEntity.UserType.MERCHANT) {
             return Either.Left(new MerchantPayerError());
         }
 
-        if (!debitTransference.validateDebit(payer)) {
+        if (!debitTransference.validateDebit(payerOptional.get())) {
             return Either.Left(new NotEnoughMoneyError());
         }
 
         TransferenceEntity creditTransference = debitTransference.toCredit();
-        UserEntity payerToUpdate = payer.toDebit(debitTransference.getAmount());
-        UserEntity payeeToUpdate = payee.toCredit(debitTransference.getAmount());
+        UserEntity payerToUpdate = payerOptional.get().toDebit(debitTransference.getAmount());
+        UserEntity payeeToUpdate = payeeOptional.get().toCredit(debitTransference.getAmount());
 
         TransferenceEntity transferenceToReturn = transferenceGateway.create(debitTransference);
 

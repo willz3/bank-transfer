@@ -53,6 +53,7 @@ public class UserEntity extends Entity {
                 .withId(getId())//
                 .withName(getName())//
                 .withDocument(getDocument())//
+                .withPassword(getPassword())//
                 .withEmail(getEmail())//
                 .withType(getType())//
                 .withBalance(newBalance)//
@@ -69,6 +70,7 @@ public class UserEntity extends Entity {
                 .withName(getName())//
                 .withDocument(getDocument())//
                 .withEmail(getEmail())//
+                .withPassword(getPassword())//
                 .withType(getType())//
                 .withBalance(newBalance)//
                 .withCreatedAt(getCreatedAt())//

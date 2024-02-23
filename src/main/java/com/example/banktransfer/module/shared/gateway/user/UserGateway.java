@@ -4,6 +4,8 @@ import com.example.banktransfer.module.transference.v1.entity.UserEntity;
 import com.example.banktransfer.module.transference.v1.repository.protocol.IUserRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class UserGateway implements IUserGateway {
 
@@ -14,7 +16,7 @@ public class UserGateway implements IUserGateway {
     }
 
     @Override
-    public UserEntity findUserById(Long id) {
+    public Optional<UserEntity> findUserById(Long id) {
         return this.repository.findByUserId(id);
     }
 
