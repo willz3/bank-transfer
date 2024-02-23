@@ -2,6 +2,8 @@ package com.example.banktransfer.infrastructure.db.jpa.model;
 
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,7 +18,7 @@ public class Transference implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private BigDecimal amount;
@@ -32,8 +34,10 @@ public class Transference implements Serializable {
     @Enumerated(EnumType.STRING)
     private TransferenceEntity.TransferenceType type;
 
+    @CreationTimestamp
     private Date createdAt;
 
+    @UpdateTimestamp
     private Date updatedAt;
 
     private Date deletedAt;
