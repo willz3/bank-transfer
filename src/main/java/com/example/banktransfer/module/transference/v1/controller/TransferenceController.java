@@ -1,7 +1,7 @@
 package com.example.banktransfer.module.transference.v1.controller;
 
 import com.example.banktransfer.core.shared.logic.Either;
-import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceDTO;
+import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceRequestDTO;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import com.example.banktransfer.module.transference.v1.error.UnauthorizedTransactionError;
 import com.example.banktransfer.module.transference.v1.mapper.presentation.CreateTransferenceMapper.ICreateTransferenceMapper;
@@ -28,7 +28,7 @@ public class TransferenceController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> handle(@RequestBody @Validated CreateTransferenceDTO request) {
+    public ResponseEntity<Object> handle(@RequestBody @Validated CreateTransferenceRequestDTO request) {
         TransferenceEntity transference = mapper.toEntity(request);
 
         Either<Error, TransferenceEntity> result = useCase.execute(transference);
@@ -36,7 +36,7 @@ public class TransferenceController {
         return prepareResponse(result);
     }
 
-    private static ResponseEntity<Object> prepareResponse(Either<Error, TransferenceEntity> result) {
+    private ResponseEntity<Object> prepareResponse(Either<Error, TransferenceEntity> result) {
         if (result.isLeft()) {
             if (result.getLeft() instanceof UnauthorizedTransactionError) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result.getLeft().getMessage());
@@ -44,6 +44,6 @@ public class TransferenceController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.getLeft().getMessage());
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(result.getRight());
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(result.getRight()));
     }
 }
