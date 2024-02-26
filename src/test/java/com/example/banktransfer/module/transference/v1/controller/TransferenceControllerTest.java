@@ -4,6 +4,7 @@ import com.example.banktransfer.core.shared.logic.Either;
 import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceDTO;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
+import com.example.banktransfer.module.transference.v1.error.UnauthorizedTransactionError;
 import com.example.banktransfer.module.transference.v1.mapper.presentation.CreateTransferenceMapper.ICreateTransferenceMapper;
 import com.example.banktransfer.module.transference.v1.usecase.CreateTransference.ICreateTransferenceUseCase;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,6 +85,18 @@ class TransferenceControllerTest {
         ResponseEntity<Object> result = sut.handle(dto);
 
         assertEquals(result.getStatusCode().value(), 201);
+    }
+
+    @Test
+    @DisplayName("should return 401 if use case return UnauthorizedTransactionError.")
+    void returnUnauthorized() {
+        CreateTransferenceDTO dto = makeDTO();
+        UnauthorizedTransactionError error = new UnauthorizedTransactionError();
+        when(useCase.execute(ENTITY_MOCK)).thenReturn(Either.Left(error));
+        ResponseEntity<Object> result = sut.handle(dto);
+
+        assertEquals(result.getStatusCode().value(), 401);
+        assertEquals(result.getBody(), error.getMessage());
     }
 
     CreateTransferenceDTO makeDTO() {
