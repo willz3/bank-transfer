@@ -1,7 +1,7 @@
 package com.example.banktransfer.module.transference.v1.controller;
 
 import com.example.banktransfer.core.shared.logic.Either;
-import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceDTO;
+import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceRequestDTO;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
 import com.example.banktransfer.module.transference.v1.error.UnauthorizedTransactionError;
@@ -26,7 +26,7 @@ class TransferenceControllerTest {
 
     private TransferenceEntity ENTITY_MOCK = makeEntity();
 
-    private CreateTransferenceDTO DTO = makeDTO();
+    private CreateTransferenceRequestDTO DTO = makeDTO();
 
     @Mock
     private ICreateTransferenceMapper mapper;
@@ -55,7 +55,7 @@ class TransferenceControllerTest {
     @Test
     @DisplayName("should call use case with correct values")
     void callUseCaseWithCorrectValues() {
-        CreateTransferenceDTO dto = makeDTO();
+        CreateTransferenceRequestDTO dto = makeDTO();
         when(mapper.toEntity(dto)).thenReturn(ENTITY_MOCK);
 
         sut.handle(dto);
@@ -66,7 +66,7 @@ class TransferenceControllerTest {
     @Test
     @DisplayName("should return 400 if use case execution return PayerNotFoundError.")
     void returnBadRequest() {
-        CreateTransferenceDTO dto = makeDTO();
+        CreateTransferenceRequestDTO dto = makeDTO();
 
         PayerNotFoundError error = new PayerNotFoundError();
         when(useCase.execute(ENTITY_MOCK)).thenReturn(Either.Left(error));
@@ -80,7 +80,7 @@ class TransferenceControllerTest {
     @Test
     @DisplayName("should return 201 if use case execution succeeds.")
     void returnCrated() {
-        CreateTransferenceDTO dto = makeDTO();
+        CreateTransferenceRequestDTO dto = makeDTO();
 
         ResponseEntity<Object> result = sut.handle(dto);
 
@@ -90,7 +90,7 @@ class TransferenceControllerTest {
     @Test
     @DisplayName("should return 401 if use case return UnauthorizedTransactionError.")
     void returnUnauthorized() {
-        CreateTransferenceDTO dto = makeDTO();
+        CreateTransferenceRequestDTO dto = makeDTO();
         UnauthorizedTransactionError error = new UnauthorizedTransactionError();
         when(useCase.execute(ENTITY_MOCK)).thenReturn(Either.Left(error));
         ResponseEntity<Object> result = sut.handle(dto);
@@ -99,8 +99,8 @@ class TransferenceControllerTest {
         assertEquals(result.getBody(), error.getMessage());
     }
 
-    CreateTransferenceDTO makeDTO() {
-        return new CreateTransferenceDTO(BigDecimal.valueOf(100), 1L, 2L);
+    CreateTransferenceRequestDTO makeDTO() {
+        return new CreateTransferenceRequestDTO(BigDecimal.valueOf(100), 1L, 2L);
     }
 
     TransferenceEntity makeEntity() {
