@@ -43,6 +43,44 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
         Optional<UserEntity> payerOptional = payerFuture.join();
         Optional<UserEntity> payeeOptional = payeeFuture.join();
 
+        Either<Error, TransferenceEntity> eitherValid = validateTransaction(debitTransference, payerOptional, payeeOptional);
+
+        if (eitherValid != null) return eitherValid;
+
+        TransferenceEntity creditTransference = debitTransference.toCredit();
+        UserEntity payerToUpdate = payerOptional.get().toDebit(debitTransference.getAmount());
+        UserEntity payeeToUpdate = payeeOptional.get().toCredit(debitTransference.getAmount());
+
+        TransferenceEntity transferenceToReturn = transferenceGateway.create(debitTransference);
+
+        updateEntities(creditTransference, payerToUpdate, payeeToUpdate);
+
+        return Either.Right(transferenceToReturn);
+    }
+
+    private void updateEntities(TransferenceEntity creditTransference, UserEntity payerToUpdate, UserEntity payeeToUpdate) {
+        CompletableFuture<Void> createTransferenceFuture = CompletableFuture.supplyAsync(()
+                -> {
+             transferenceGateway.create(creditTransference);
+             return null;
+        });
+
+        CompletableFuture<Void> updatePayerFuture = CompletableFuture.supplyAsync(()
+                -> {
+            userGateway.updateUser(payerToUpdate);
+            return null;
+        });
+
+        CompletableFuture<Void> updatePayeeFuture = CompletableFuture.supplyAsync(()
+                -> {
+            userGateway.updateUser(payeeToUpdate);
+            return null;
+        });
+
+        CompletableFuture.allOf(createTransferenceFuture, updatePayerFuture, updatePayeeFuture).join();
+    }
+
+    private Either<Error, TransferenceEntity> validateTransaction(TransferenceEntity debitTransference, Optional<UserEntity> payerOptional, Optional<UserEntity> payeeOptional) {
         if (payerOptional.isEmpty()) {
             return Either.Left(new PayerNotFoundError());
         }
@@ -63,16 +101,6 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
             return Either.Left(new UnauthorizedTransactionError());
         }
 
-        TransferenceEntity creditTransference = debitTransference.toCredit();
-        UserEntity payerToUpdate = payerOptional.get().toDebit(debitTransference.getAmount());
-        UserEntity payeeToUpdate = payeeOptional.get().toCredit(debitTransference.getAmount());
-
-        TransferenceEntity transferenceToReturn = transferenceGateway.create(debitTransference);
-
-        transferenceGateway.create(creditTransference);
-        userGateway.updateUser(payerToUpdate);
-        userGateway.updateUser(payeeToUpdate);
-
-        return Either.Right(transferenceToReturn);
+        return null;
     }
 }
