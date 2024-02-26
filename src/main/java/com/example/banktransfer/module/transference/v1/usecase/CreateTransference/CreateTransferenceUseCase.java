@@ -97,7 +97,7 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
             return Either.Left(new NotEnoughMoneyError());
         }
 
-        if(!authorizer.auth()) {
+        if (!authorizer.auth()) {
             return Either.Left(new UnauthorizedTransactionError());
         }
 

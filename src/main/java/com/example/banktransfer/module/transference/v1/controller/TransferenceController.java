@@ -3,6 +3,7 @@ package com.example.banktransfer.module.transference.v1.controller;
 import com.example.banktransfer.core.shared.logic.Either;
 import com.example.banktransfer.module.transference.v1.dto.request.CreateTransferenceDTO;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
+import com.example.banktransfer.module.transference.v1.error.UnauthorizedTransactionError;
 import com.example.banktransfer.module.transference.v1.mapper.presentation.CreateTransferenceMapper.ICreateTransferenceMapper;
 import com.example.banktransfer.module.transference.v1.usecase.CreateTransference.ICreateTransferenceUseCase;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,14 @@ public class TransferenceController {
 
         Either<Error, TransferenceEntity> result = useCase.execute(transference);
 
+        return prepareResponse(result);
+    }
+
+    private static ResponseEntity<Object> prepareResponse(Either<Error, TransferenceEntity> result) {
         if (result.isLeft()) {
+            if (result.getLeft() instanceof UnauthorizedTransactionError) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result.getLeft().getMessage());
+            }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.getLeft().getMessage());
         }
 
