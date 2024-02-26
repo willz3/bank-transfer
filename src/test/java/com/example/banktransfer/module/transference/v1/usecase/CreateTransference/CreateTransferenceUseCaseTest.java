@@ -1,15 +1,12 @@
 package com.example.banktransfer.module.transference.v1.usecase.CreateTransference;
 
 import com.example.banktransfer.core.shared.logic.Either;
-import com.example.banktransfer.infrastructure.db.jpa.model.User;
+import com.example.banktransfer.module.shared.authorization.IAuthorization;
 import com.example.banktransfer.module.shared.gateway.transference.ITransferenceGateway;
 import com.example.banktransfer.module.transference.v1.entity.TransferenceEntity;
 import com.example.banktransfer.module.transference.v1.entity.UserEntity;
-import com.example.banktransfer.module.transference.v1.error.MerchantPayerError;
-import com.example.banktransfer.module.transference.v1.error.NotEnoughMoneyError;
+import com.example.banktransfer.module.transference.v1.error.*;
 import com.example.banktransfer.module.shared.gateway.user.IUserGateway;
-import com.example.banktransfer.module.transference.v1.error.PayeeNotFoundError;
-import com.example.banktransfer.module.transference.v1.error.PayerNotFoundError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -34,6 +30,9 @@ class CreateTransferenceUseCaseTest {
     @Mock
     ITransferenceGateway transferenceGateway;
 
+    @Mock
+    IAuthorization authorizer;
+
     @InjectMocks
     CreateTransferenceUseCase sut;
 
@@ -48,6 +47,7 @@ class CreateTransferenceUseCaseTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        when(authorizer.auth()).thenReturn(true);
         when(userGateway.findUserById(PAYER_ID)).thenReturn(PAYER);
         when(userGateway.findUserById(PAYEE_ID)).thenReturn(PAYEE);
     }
@@ -184,6 +184,18 @@ class CreateTransferenceUseCaseTest {
 
         assertTrue(result.isLeft());
         assertInstanceOf(PayeeNotFoundError.class, result.getLeft());
+    }
+
+    @Test
+    @DisplayName("should return error if authorizer returns false.")
+    void unauthorizedTransaction() {
+        TransferenceEntity transferenceEntity = makeEntity();
+        when(authorizer.auth()).thenReturn(false);
+        Either<Error, TransferenceEntity> result = sut.execute(transferenceEntity);
+
+
+        assertTrue(result.isLeft());
+        assertInstanceOf(UnauthorizedTransactionError.class, result.getLeft());
     }
 
     TransferenceEntity makeEntity() {
