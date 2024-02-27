@@ -1,6 +1,8 @@
 package com.example.banktransfer.module.transference.v1.error;
 
-public class UnauthorizedTransactionError extends Error {
+import com.example.banktransfer.core.domain.DomainError;
+
+public class UnauthorizedTransactionError extends DomainError {
     public UnauthorizedTransactionError() {
         super("Unauthorized transaction.");
     }

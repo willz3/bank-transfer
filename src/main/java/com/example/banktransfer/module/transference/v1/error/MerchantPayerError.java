@@ -1,6 +1,8 @@
 package com.example.banktransfer.module.transference.v1.error;
 
-public class MerchantPayerError extends Error {
+import com.example.banktransfer.core.domain.DomainError;
+
+public class MerchantPayerError extends DomainError {
     public MerchantPayerError() {
         super("Merchant can't made a transference.");
     }

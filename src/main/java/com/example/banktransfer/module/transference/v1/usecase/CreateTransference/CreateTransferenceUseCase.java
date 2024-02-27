@@ -1,5 +1,6 @@
 package com.example.banktransfer.module.transference.v1.usecase.CreateTransference;
 
+import com.example.banktransfer.core.domain.DomainError;
 import com.example.banktransfer.core.shared.logic.Either;
 import com.example.banktransfer.module.shared.authorization.IAuthorization;
 import com.example.banktransfer.module.shared.gateway.transference.ITransferenceGateway;
@@ -31,7 +32,7 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
 
     @Override
     @Transactional
-    public Either<Error, TransferenceEntity> execute(TransferenceEntity debitTransference) {
+    public Either<DomainError, TransferenceEntity> execute(TransferenceEntity debitTransference) {
 
         CompletableFuture<Optional<UserEntity>> payerFuture = CompletableFuture.supplyAsync(()
                 -> userGateway.findUserById(debitTransference.getPayerId()));
@@ -43,9 +44,11 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
         Optional<UserEntity> payerOptional = payerFuture.join();
         Optional<UserEntity> payeeOptional = payeeFuture.join();
 
-        Either<Error, TransferenceEntity> eitherValid = validateTransaction(debitTransference, payerOptional, payeeOptional);
+        Either<DomainError, Void> eitherValid = validateTransaction(debitTransference, payerOptional, payeeOptional);
 
-        if (eitherValid != null) return eitherValid;
+        if (eitherValid.isLeft()) {
+            return Either.Left(eitherValid.getLeft());
+        }
 
         TransferenceEntity creditTransference = debitTransference.toCredit();
         UserEntity payerToUpdate = payerOptional.get().toDebit(debitTransference.getAmount());
@@ -80,7 +83,7 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
         CompletableFuture.allOf(createTransferenceFuture, updatePayerFuture, updatePayeeFuture).join();
     }
 
-    private Either<Error, TransferenceEntity> validateTransaction(TransferenceEntity debitTransference, Optional<UserEntity> payerOptional, Optional<UserEntity> payeeOptional) {
+    private Either<DomainError, Void> validateTransaction(TransferenceEntity debitTransference, Optional<UserEntity> payerOptional, Optional<UserEntity> payeeOptional) {
         if (payerOptional.isEmpty()) {
             return Either.Left(new PayerNotFoundError());
         }
@@ -101,6 +104,6 @@ public class CreateTransferenceUseCase implements ICreateTransferenceUseCase {
             return Either.Left(new UnauthorizedTransactionError());
         }
 
-        return null;
+        return Either.Right(null);
     }
 }
